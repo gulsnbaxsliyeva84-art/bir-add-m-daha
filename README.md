@@ -1,2 +1,2 @@
-# bir-add-m-daha
+# bir-addım-daha
 a free study motivation app
