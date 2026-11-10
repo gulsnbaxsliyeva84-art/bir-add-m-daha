@@ -1,0 +1,919 @@
+
+<!DOCTYPE html>
+<html lang="az">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Bir Addım Daha</title>
+
+<style>
+* {
+  box-sizing: border-box;
+}
+
+body {
+  margin: 0;
+  background: #080808;
+  color: white;
+  font-family: Arial, sans-serif;
+  padding-bottom: 35px;
+}
+
+header {
+  padding: 28px 20px;
+  text-align: center;
+  border-bottom: 1px solid #333;
+}
+
+header h1 {
+  font-size: 27px;
+  letter-spacing: 1px;
+}
+
+header p {
+  color: #aaa;
+}
+
+nav {
+  display: flex;
+  justify-content: space-around;
+  padding: 15px 5px;
+  background: #151515;
+  position: sticky;
+  top: 0;
+  z-index: 5;
+}
+
+nav button {
+  background: transparent;
+  color: white;
+  border: none;
+  font-size: 13px;
+  padding: 8px;
+  width: auto;
+}
+
+main {
+  padding: 15px;
+  max-width: 600px;
+  margin: auto;
+}
+
+.page {
+  display: none;
+}
+
+.page.active {
+  display: block;
+}
+
+.card {
+  background: #191919;
+  border: 1px solid #383838;
+  border-radius: 17px;
+  padding: 19px;
+  margin-bottom: 17px;
+}
+
+h2 {
+  font-size: 19px;
+}
+
+input:not([type=checkbox]) {
+  width: 100%;
+  background: #080808;
+  border: 1px solid #555;
+  border-radius: 10px;
+  padding: 13px;
+  color: white;
+  margin: 8px 0;
+}
+
+button.action {
+  width: 100%;
+  padding: 13px;
+  background: white;
+  color: black;
+  border: none;
+  border-radius: 10px;
+  font-weight: bold;
+  margin-top: 9px;
+}
+
+.small {
+  color: #aaa;
+  font-size: 13px;
+}
+
+.stat {
+  font-size: 30px;
+  font-weight: bold;
+}
+
+.progress-bg {
+  height: 11px;
+  background: #444;
+  border-radius: 20px;
+  overflow: hidden;
+  margin-top: 12px;
+}
+
+.progress-fill {
+  height: 100%;
+  width: 0%;
+  background: white;
+  transition: width .3s;
+}
+
+li {
+  list-style: none;
+  border-bottom: 1px solid #333;
+  padding: 12px 0;
+  display: flex;
+
+  align-items: center;
+  gap: 10px;
+  overflow-wrap: anywhere;
+}
+
+li input {
+  accent-color: white;
+  flex-shrink: 0;
+}
+
+#timer {
+  text-align: center;
+  font-size: 38px;
+  font-weight: bold;
+}
+
+footer {
+  text-align: center;
+  color: #666;
+  padding: 20px;
+}
+</style>
+
+<link rel="manifest" href="manifest.json">
+<meta name="theme-color" content="#000000">
+
+<script>
+if ("serviceWorker" in navigator) {
+  navigator.serviceWorker.register("./service-worker.js");
+}
+</script>
+
+</head> 
+<body>
+
+<header>
+  <h1>🖤 BİR ADDIM DAHA</h1>
+  <p>Hər gün özünün daha yaxşı versiyası ol.</p>
+</header>
+
+<nav>
+  <button onclick="showPage('home')">🏠 Ana səhifə</button>
+  <button onclick="showPage('tasks')">📚 Dərslər</button>
+  <button onclick="showPage('stats')">📊 Statistika</button>
+  <button onclick="showPage('profile')">👤 Profil</button>
+</nav>
+
+<main>
+
+<section id="home" class="page active">
+
+  <div class="card">
+    <h2>Salam, <span id="welcome">Dostum</span>! 👋</h2>
+    <p class="small">Bu gün məqsədinə bir addım daha yaxınlaş.</p>
+  </div>
+
+  <div class="card">
+    <h2>🎯 Bugünkü hədəfin</h2>
+    <input id="goal" placeholder="Hədəfini yaz...">
+    <button class="action" onclick="saveGoal()">Yadda saxla</button>
+    <p id="saved" class="small"></p>
+  </div>
+
+  <div class="card">
+    <h2>📊 Bugünkü irəliləyiş</h2>
+    <div class="stat" id="homePercent">0%</div>
+    <div class="progress-bg">
+      <div class="progress-fill" id="homeBar"></div>
+    </div>
+    <p id="homeDone" class="small">0 tapşırıq tamamlanıb.</p>
+  </div>
+
+  <div class="card">
+    <h2>🔥 Günün motivasiyası</h2>
+    <p id="message">Uğur kiçik addımlardan başlayır!</p>
+    <button class="action" onclick="motivate()">Yeni motivasiya</button>
+  </div>
+
+</section>
+
+<section id="tasks" class="page">
+
+  <div class="card">
+    <h2>📚 Gündəlik dərs planım</h2>
+    <input id="taskInput" placeholder="Tapşırığın adını yaz...">
+    <button class="action" onclick="addTask()">+ Tapşırıq əlavə et</button>
+    <ul id="taskList"></ul>
+    <p id="progress" class="small">0 / 0 tamamlanıb</p>
+    <p id="achievement"></p>
+  </div>
+
+  <div class="card">
+    <h2>⏳ Dərs taymeri</h2>
+    <div id="timer">25:00</div>
+    <button class="action" onclick="startTimer()">Başla</button>
+    <button class="action" onclick="pauseTimer()">Dayandır</button>
+    <button class="action" onclick="resetTimer()">Yenidən başla</button>
+  </div>
+
+</section>
+
+<section id="stats" class="page">
+
+  <div class="card">
+    <h2>📊 Mənim statistikam</h2>
+    <p class="small">Bütün tapşırıqlar üzrə</p>
+    <div class="stat" id="totalTasks">0</div>
+    <p class="small">Ümumi tapşırıqlar</p>
+    <div class="stat" id="completedTasks">0</div>
+    <p class="small">Tamamlanan tapşırıqlar</p>
+    <div class="stat" id="statPercent">0%</div>
+    <p class="small">Tamamlanma faizi</p>
+  </div>
+
+  <div class="card">
+    <h2>🏆 Uğur mesajı</h2>
+    <p id="statMessage">İlk addımını at!</p>
+  </div>
+
+</section>
+
+<section id="profile" class="page">
+
+  <div class="card">
+    <h2>👤 Mənim profilim</h2>
+    <p class="small">Adını daxil et.</p>
+    <input id="nameInput" placeholder="Adın...">
+    <button class="action" onclick="saveName()">Profili yadda saxla</button>
+    <p id="profileMessage"></p>
+  </div>
+
+  <div class="card">
+    <h2>🖤 Haqqımızda</h2>
+    <p>Bir Addım Daha — məqsədlərinə çatmaq üçün sənin şəxsi dərs köməkçin.</p>
+    <p class="small">Kiçik addımlar, böyük uğurlar.</p>
+    <p>Versiya 2.0</p>
+  </div>
+
+</section>
+
+</main>
+
+<footer>
+  BİR ADDIM DAHA © 2026
+</footer>
+
+<script>
+
+function showPage(id) {
+  document.querySelectorAll(".page").forEach(page => {
+    page.classList.remove("active");
+  });
+
+  document.getElementById(id).classList.add("active");
+  updateStats();
+}
+
+function saveName() {
+  const name = document.getElementById("nameInput").value.trim();
+
+  if (!name) return alert("Adını yaz!");
+
+  localStorage.setItem("userName", name);
+  updateName();
+
+  document.getElementById("profileMessage").innerText =
+    "✓ Profil yadda saxlandı!";
+}
+
+function updateName() {
+  const name = localStorage.getItem("userName") || "Dostum";
+
+  document.getElementById("welcome").innerText = name;
+  document.getElementById("nameInput").value =
+    localStorage.getItem("userName") || "";
+}
+
+function saveGoal() {
+  const goal = document.getElementById("goal").value.trim();
+
+  if (!goal) return alert("Hədəfini yaz!");
+
+  localStorage.setItem("goal", goal);
+  document.getElementById("saved").innerText = "✓ " + goal;
+}
+
+function createTask(text, done = false) {
+  const li = document.createElement("li");
+  const check = document.createElement("input");
+
+  li.dataset.task = text;
+  check.type = "checkbox";
+  check.checked = done;
+
+  check.onchange = () => {
+    saveTasks();
+    updateStats();
+  };
+
+  li.appendChild(check);
+  li.appendChild(document.createTextNode(text));
+
+  document.getElementById("taskList").appendChild(li);
+}
+
+function addTask() {
+  const input = document.getElementById("taskInput");
+  const text = input.value.trim();
+
+  if (!text) return alert("Tapşırıq yaz!");
+
+  createTask(text);
+  input.value = "";
+
+  saveTasks();
+  updateStats();
+}
+
+function saveTasks() {
+  const tasks = [...document.querySelectorAll("#taskList li")]
+    .map(li => ({
+      text: li.dataset.task,
+      done: li.querySelector("input").checked
+    }));
+
+  localStorage.setItem("tasks", JSON.stringify(tasks));
+}
+
+function loadTasks() {
+  const tasks = JSON.parse(localStorage.getItem("tasks") || "[]");
+
+  tasks.forEach(task => createTask(task.text, task.done));
+  updateStats();
+}
+
+function updateStats() {
+  const checks = [...document.querySelectorAll("#taskList input")];
+  const done = checks.filter(c => c.checked).length;
+  const total = checks.length;
+
+  const percent = total ? Math.round(done / total * 100) : 0;
+
+  document.getElementById("progress").innerText =
+    done + " / " + total + " tamamlanıb — " + percent + "%";
+
+  document.getElementById("achievement").innerText =
+    total > 0 && done === total
+    ? "🏆 Bütün tapşırıqlar tamamlandı!"
+    : "🔥 Bir addım daha!";
+
+  document.getElementById("homePercent").innerText = percent + "%";
+  document.getElementById("homeBar").style.width = percent + "%";
+  document.getElementById("homeDone").innerText =
+    done + " tapşırıq tamamlanıb.";
+
+  document.getElementById("totalTasks").innerText = total;
+  document.getElementById("completedTasks").innerText = done;
+  document.getElementById("statPercent").innerText = percent + "%";
+
+  document.getElementById("statMessage").innerText =
+    total > 0 && done === total
+    ? "🏆 Möhtəşəm! Bütün tapşırıqlarını tamamladın!"
+    : "Davam et, hər addım səni məqsədinə yaxınlaşdırır!";
+}
+
+let seconds = 1500;
+let interval = null;
+
+function showTimer() {
+  document.getElementById("timer").innerText =
+    String(Math.floor(seconds / 60)).padStart(2, "0") +
+    ":" + String(seconds % 60).padStart(2, "0");
+}
+
+function startTimer() {
+  if (interval) return;
+
+  interval = setInterval(() => {
+    if (seconds > 0) {
+      seconds--;
+      showTimer();
+    } else {
+      pauseTimer();
+      alert("Əla! Dərs vaxtın tamamlandı! 🖤");
+    }
+  }, 1000);
+}
+
+function pauseTimer() {
+  clearInterval(interval);
+  interval = null;
+}
+
+function resetTimer() {
+  pauseTimer();
+  seconds = 1500;
+  showTimer();
+}
+
+function motivate() {
+  const messages = [
+    "Sən bacararsan!",
+    "Hər gün bir addım daha!",
+    "Özünə inan!",
+    "Zəhmətin gələcəyini qurur!",
+    "Kiçik addımlar böyük uğurlar yaradır!"
+  ];
+
+  document.getElementById("message").innerText =
+    messages[Math.floor(Math.random() * messages.length)];
+}
+
+const oldGoal = localStorage.getItem("goal");
+
+if (oldGoal) {
+  document.getElementById("goal").value = oldGoal;
+  document.getElementById("saved").innerText = "✓ " + oldGoal;
+}
+
+updateName();
+loadTasks();
+showTimer();
+
+</script>
+
+</body>
+      </html>
+<!DOCTYPE html>
+<html lang="az">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Bir Addım Daha</title>
+
+<style>
+* {
+  box-sizing: border-box;
+}
+
+body {
+  margin: 0;
+  background: #080808;
+  color: white;
+  font-family: Arial, sans-serif;
+  padding-bottom: 35px;
+}
+
+header {
+  padding: 28px 20px;
+  text-align: center;
+  border-bottom: 1px solid #333;
+}
+
+header h1 {
+  font-size: 27px;
+  letter-spacing: 1px;
+}
+
+header p {
+  color: #aaa;
+}
+
+nav {
+  display: flex;
+  justify-content: space-around;
+  padding: 15px 5px;
+  background: #151515;
+  position: sticky;
+  top: 0;
+  z-index: 5;
+}
+
+nav button {
+  background: transparent;
+  color: white;
+  border: none;
+  font-size: 13px;
+  padding: 8px;
+  width: auto;
+}
+
+main {
+  padding: 15px;
+  max-width: 600px;
+  margin: auto;
+}
+
+.page {
+  display: none;
+}
+
+.page.active {
+  display: block;
+}
+
+.card {
+  background: #191919;
+  border: 1px solid #383838;
+  border-radius: 17px;
+  padding: 19px;
+  margin-bottom: 17px;
+}
+
+h2 {
+  font-size: 19px;
+}
+
+input:not([type=checkbox]) {
+  width: 100%;
+  background: #080808;
+  border: 1px solid #555;
+  border-radius: 10px;
+  padding: 13px;
+  color: white;
+  margin: 8px 0;
+}
+
+button.action {
+  width: 100%;
+  padding: 13px;
+  background: white;
+  color: black;
+  border: none;
+  border-radius: 10px;
+  font-weight: bold;
+  margin-top: 9px;
+}
+
+.small {
+  color: #aaa;
+  font-size: 13px;
+}
+
+.stat {
+  font-size: 30px;
+  font-weight: bold;
+}
+
+.progress-bg {
+  height: 11px;
+  background: #444;
+  border-radius: 20px;
+  overflow: hidden;
+  margin-top: 12px;
+}
+
+.progress-fill {
+  height: 100%;
+  width: 0%;
+  background: white;
+  transition: width .3s;
+}
+
+li {
+  list-style: none;
+  border-bottom: 1px solid #333;
+  padding: 12px 0;
+  display: flex;
+
+  align-items: center;
+  gap: 10px;
+  overflow-wrap: anywhere;
+}
+
+li input {
+  accent-color: white;
+  flex-shrink: 0;
+}
+
+#timer {
+  text-align: center;
+  font-size: 38px;
+  font-weight: bold;
+}
+
+footer {
+  text-align: center;
+  color: #666;
+  padding: 20px;
+}
+</style>
+
+<link rel="manifest" href="manifest.json">
+<meta name="theme-color" content="#000000">
+
+<script>
+if ("serviceWorker" in navigator) {
+  navigator.serviceWorker.register("./service-worker.js");
+}
+</script>
+
+</head> 
+<body>
+
+<header>
+  <h1>🖤 BİR ADDIM DAHA</h1>
+  <p>Hər gün özünün daha yaxşı versiyası ol.</p>
+</header>
+
+<nav>
+  <button onclick="showPage('home')">🏠 Ana səhifə</button>
+  <button onclick="showPage('tasks')">📚 Dərslər</button>
+  <button onclick="showPage('stats')">📊 Statistika</button>
+  <button onclick="showPage('profile')">👤 Profil</button>
+</nav>
+
+<main>
+
+<section id="home" class="page active">
+
+  <div class="card">
+    <h2>Salam, <span id="welcome">Dostum</span>! 👋</h2>
+    <p class="small">Bu gün məqsədinə bir addım daha yaxınlaş.</p>
+  </div>
+
+  <div class="card">
+    <h2>🎯 Bugünkü hədəfin</h2>
+    <input id="goal" placeholder="Hədəfini yaz...">
+    <button class="action" onclick="saveGoal()">Yadda saxla</button>
+    <p id="saved" class="small"></p>
+  </div>
+
+  <div class="card">
+    <h2>📊 Bugünkü irəliləyiş</h2>
+    <div class="stat" id="homePercent">0%</div>
+    <div class="progress-bg">
+      <div class="progress-fill" id="homeBar"></div>
+    </div>
+    <p id="homeDone" class="small">0 tapşırıq tamamlanıb.</p>
+  </div>
+
+  <div class="card">
+    <h2>🔥 Günün motivasiyası</h2>
+    <p id="message">Uğur kiçik addımlardan başlayır!</p>
+    <button class="action" onclick="motivate()">Yeni motivasiya</button>
+  </div>
+
+</section>
+
+<section id="tasks" class="page">
+
+  <div class="card">
+    <h2>📚 Gündəlik dərs planım</h2>
+    <input id="taskInput" placeholder="Tapşırığın adını yaz...">
+    <button class="action" onclick="addTask()">+ Tapşırıq əlavə et</button>
+    <ul id="taskList"></ul>
+    <p id="progress" class="small">0 / 0 tamamlanıb</p>
+    <p id="achievement"></p>
+  </div>
+
+  <div class="card">
+    <h2>⏳ Dərs taymeri</h2>
+    <div id="timer">25:00</div>
+    <button class="action" onclick="startTimer()">Başla</button>
+    <button class="action" onclick="pauseTimer()">Dayandır</button>
+    <button class="action" onclick="resetTimer()">Yenidən başla</button>
+  </div>
+
+</section>
+
+<section id="stats" class="page">
+
+  <div class="card">
+    <h2>📊 Mənim statistikam</h2>
+    <p class="small">Bütün tapşırıqlar üzrə</p>
+    <div class="stat" id="totalTasks">0</div>
+    <p class="small">Ümumi tapşırıqlar</p>
+    <div class="stat" id="completedTasks">0</div>
+    <p class="small">Tamamlanan tapşırıqlar</p>
+    <div class="stat" id="statPercent">0%</div>
+    <p class="small">Tamamlanma faizi</p>
+  </div>
+
+  <div class="card">
+    <h2>🏆 Uğur mesajı</h2>
+    <p id="statMessage">İlk addımını at!</p>
+  </div>
+
+</section>
+
+<section id="profile" class="page">
+
+  <div class="card">
+    <h2>👤 Mənim profilim</h2>
+    <p class="small">Adını daxil et.</p>
+    <input id="nameInput" placeholder="Adın...">
+    <button class="action" onclick="saveName()">Profili yadda saxla</button>
+    <p id="profileMessage"></p>
+  </div>
+
+  <div class="card">
+    <h2>🖤 Haqqımızda</h2>
+    <p>Bir Addım Daha — məqsədlərinə çatmaq üçün sənin şəxsi dərs köməkçin.</p>
+    <p class="small">Kiçik addımlar, böyük uğurlar.</p>
+    <p>Versiya 2.0</p>
+  </div>
+
+</section>
+
+</main>
+
+<footer>
+  BİR ADDIM DAHA © 2026
+</footer>
+
+<script>
+
+function showPage(id) {
+  document.querySelectorAll(".page").forEach(page => {
+    page.classList.remove("active");
+  });
+
+  document.getElementById(id).classList.add("active");
+  updateStats();
+}
+
+function saveName() {
+  const name = document.getElementById("nameInput").value.trim();
+
+  if (!name) return alert("Adını yaz!");
+
+  localStorage.setItem("userName", name);
+  updateName();
+
+  document.getElementById("profileMessage").innerText =
+    "✓ Profil yadda saxlandı!";
+}
+
+function updateName() {
+  const name = localStorage.getItem("userName") || "Dostum";
+
+  document.getElementById("welcome").innerText = name;
+  document.getElementById("nameInput").value =
+    localStorage.getItem("userName") || "";
+}
+
+function saveGoal() {
+  const goal = document.getElementById("goal").value.trim();
+
+  if (!goal) return alert("Hədəfini yaz!");
+
+  localStorage.setItem("goal", goal);
+  document.getElementById("saved").innerText = "✓ " + goal;
+}
+
+function createTask(text, done = false) {
+  const li = document.createElement("li");
+  const check = document.createElement("input");
+
+  li.dataset.task = text;
+  check.type = "checkbox";
+  check.checked = done;
+
+  check.onchange = () => {
+    saveTasks();
+    updateStats();
+  };
+
+  li.appendChild(check);
+  li.appendChild(document.createTextNode(text));
+
+  document.getElementById("taskList").appendChild(li);
+}
+
+function addTask() {
+  const input = document.getElementById("taskInput");
+  const text = input.value.trim();
+
+  if (!text) return alert("Tapşırıq yaz!");
+
+  createTask(text);
+  input.value = "";
+
+  saveTasks();
+  updateStats();
+}
+
+function saveTasks() {
+  const tasks = [...document.querySelectorAll("#taskList li")]
+    .map(li => ({
+      text: li.dataset.task,
+      done: li.querySelector("input").checked
+    }));
+
+  localStorage.setItem("tasks", JSON.stringify(tasks));
+}
+
+function loadTasks() {
+  const tasks = JSON.parse(localStorage.getItem("tasks") || "[]");
+
+  tasks.forEach(task => createTask(task.text, task.done));
+  updateStats();
+}
+
+function updateStats() {
+  const checks = [...document.querySelectorAll("#taskList input")];
+  const done = checks.filter(c => c.checked).length;
+  const total = checks.length;
+
+  const percent = total ? Math.round(done / total * 100) : 0;
+
+  document.getElementById("progress").innerText =
+    done + " / " + total + " tamamlanıb — " + percent + "%";
+
+  document.getElementById("achievement").innerText =
+    total > 0 && done === total
+    ? "🏆 Bütün tapşırıqlar tamamlandı!"
+    : "🔥 Bir addım daha!";
+
+  document.getElementById("homePercent").innerText = percent + "%";
+  document.getElementById("homeBar").style.width = percent + "%";
+  document.getElementById("homeDone").innerText =
+    done + " tapşırıq tamamlanıb.";
+
+  document.getElementById("totalTasks").innerText = total;
+  document.getElementById("completedTasks").innerText = done;
+  document.getElementById("statPercent").innerText = percent + "%";
+
+  document.getElementById("statMessage").innerText =
+    total > 0 && done === total
+    ? "🏆 Möhtəşəm! Bütün tapşırıqlarını tamamladın!"
+    : "Davam et, hər addım səni məqsədinə yaxınlaşdırır!";
+}
+
+let seconds = 1500;
+let interval = null;
+
+function showTimer() {
+  document.getElementById("timer").innerText =
+    String(Math.floor(seconds / 60)).padStart(2, "0") +
+    ":" + String(seconds % 60).padStart(2, "0");
+}
+
+function startTimer() {
+  if (interval) return;
+
+  interval = setInterval(() => {
+    if (seconds > 0) {
+      seconds--;
+      showTimer();
+    } else {
+      pauseTimer();
+      alert("Əla! Dərs vaxtın tamamlandı! 🖤");
+    }
+  }, 1000);
+}
+
+function pauseTimer() {
+  clearInterval(interval);
+  interval = null;
+}
+
+function resetTimer() {
+  pauseTimer();
+  seconds = 1500;
+  showTimer();
+}
+
+function motivate() {
+  const messages = [
+    "Sən bacararsan!",
+    "Hər gün bir addım daha!",
+    "Özünə inan!",
+    "Zəhmətin gələcəyini qurur!",
+    "Kiçik addımlar böyük uğurlar yaradır!"
+  ];
+
+  document.getElementById("message").innerText =
+    messages[Math.floor(Math.random() * messages.length)];
+}
+
+const oldGoal = localStorage.getItem("goal");
+
+if (oldGoal) {
+  document.getElementById("goal").value = oldGoal;
+  document.getElementById("saved").innerText = "✓ " + oldGoal;
+}
+
+updateName();
+loadTasks();
+showTimer();
+
+</script>
+
+</body>
+</html>
